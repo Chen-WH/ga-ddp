@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot name="chin">
+
+        <link
+            name="link0">
+            <inertial>
+                <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0" />
+                <mass
+                    value="4.0887" />
+                <inertia
+                    ixx="0.32376"
+                    iyy="0.50646"
+                    izz="0.69158"
+                    iyz="-0.040073"
+                    ixz="-0.097588"
+                    ixy="-0.10943"
+                     />
+            </inertial>
+            <visual>
+                <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0" />
+                <geometry>
+                    <mesh
+                        filename="package://chin_description/meshes/link0.STL" />
+                </geometry>
+                <material
+                    name="">
+                    <color
+                        rgba="0.7 0.7 0.7 1" />
+                </material>
+            </visual>
+            <collision>
+                <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0" />
+                <geometry>
+                    <mesh
+                        filename="package://chin_description/meshes/link0.STL" />
+                </geometry>
+            </collision>
+        </link>
+
+        <link
+            name="link1">
+            <inertial>
+                <origin
+                    xyz="0 0.043 0.005"
+                    rpy="3.14159265358979323846 0 0" />
+                <mass
+                    value="5.675" />
+                <inertia
+                ixx="1.1632"
+                iyy="1.1632"
+                izz="0.0125"
+                iyz="0"
+                ixz="-0.001"
+                ixy="0" />
+            </inertial>
+            <visual>
+                <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0" />
+                <geometry>
+                    <mesh
+                        filename="package://chin_description/meshes/link1.STL" />
+                </geometry>
+                <material
+                    name="">
+                    <color
+                        rgba="0.7 0.7 0.7 1" />
+                </material>
+            </visual>
+            <collision>
+                <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0" />
+                <geometry>
+                    <mesh
+                        filename="package://chin_description/meshes/link1.STL" />
+                </geometry>
+            </collision>
+        </link>
+        <joint
+            name="joint1"
+            type="revolute">
+            <origin
+                xyz="0 0 0.283"
+                rpy="3.14159265358979323846 0 0" />
+            <parent
+                link="link0" />
+            <child
+                link="link1" />
+            <axis
+                xyz="0 0 1" />
+            <limit
+                lower="-3.05"
+                upper="3.05"
+                effort="210"
+                velocity="10" />
+
+        </joint>
+        <link
+            name="link2">
+            <inertial>
+                <origin
+                    xyz="-0.298 0 -0.126"
+                    rpy="3.14159265358979323846 0 0" />
+                <mass
+                    value="5.466" />
+                <inertia
+                ixx="0.014"
+                iyy="0.124"
+                izz="0.122"
+                iyz="0"
+                ixz="0"
+                ixy="-0.009" />
+            </inertial>
+            <visual>
+                <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0" />
+                <geometry>
+                    <mesh
+                        filename="package://chin_description/meshes/link2.STL" />
+                </geometry>
+                <material
+                    name="">
+                    <color
+                        rgba="0.7 0.7 0.7 1" />
+                </material>
+            </visual>
+            <collision>
+                <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0" />
+                <geometry>
+                    <mesh
+                        filename="package://chin_description/meshes/link2.STL" />
+                </geometry>
+            </collision>
+        </link>
+        <joint
+            name="joint2"
+            type="revolute">
+            <origin
+                xyz="0 0 0"
+                rpy="1.57079632679489661923 -1.57079632679489661923 0" />
+            <parent
+                link="link1" />
+            <child
+                link="link2" />
+            <axis
+                xyz="0 0 1" />
+            <limit
+                lower="-3.05"
+                upper="3.05"
+                effort="210"
+                velocity="10" />
+
+        </joint>
+        <link
+            name="link3">
+            <inertial>
+                <origin
+                xyz="-0.274 0 -0.061"
+                rpy="0 0 0" />
+            <mass
+                value="4.294" />
+            <inertia
+            ixx="0.01"
+            iyy="0.081"
+            izz="0.076"
+            iyz="0"
+            ixz="0"
+            ixy="-0.01"  />
+            </inertial>
+            <visual>
+                <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0" />
+                <geometry>
+                    <mesh
+                        filename="package://chin_description/meshes/link3.STL" />
+                </geometry>
+                <material
+                    name="">
+                    <color
+                        rgba="0.7 0.7 0.7 1" />
+                </material>
+            </visual>
+            <collision>
+                <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0" />
+                <geometry>
+                    <mesh
+                        filename="package://chin_description/meshes/link3.STL" />
+                </geometry>
+            </collision>
+        </link>
+        <joint
+            name="joint3"
+            type="revolute">
+            <origin
+                xyz="-0.4 0 0"
+                rpy="3.14159265358979323846 0 0" />
+            <parent
+                link="link2" />
+            <child
+                link="link3" />
+            <axis
+                xyz="0 0 1" />
+            <limit
+                lower="-3.05"
+                upper="3.05"
+                effort="110"
+                velocity="10" />
+        </joint>
+        <link
+            name="link4">
+            <inertial>
+                <origin
+                    xyz="0 -0.055 0.001"
+                    rpy="0 0 0" />
+                <mass
+                    value="2.732" />
+                <inertia
+                ixx="0.005"
+                iyy="0.003"
+                izz="0.005"
+                iyz="0"
+                ixz="0"
+                ixy="0" />
+            </inertial>
+            <visual>
+                <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0" />
+                <geometry>
+                    <mesh
+                        filename="package://chin_description/meshes/link4.STL" />
+                </geometry>
+                <material
+                    name="">
+                    <color
+                        rgba="0.7 0.7 0.7 1" />
+                </material>
+            </visual>
+            <collision>
+                <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0" />
+                <geometry>
+                    <mesh
+                        filename="package://chin_description/meshes/link4.STL" />
+                </geometry>
+            </collision>
+        </link>
+        <joint
+            name="joint4"
+            type="revolute">
+            <origin
+                xyz="-0.36 0 0.19875"
+                rpy="3.14159265358979323846 0 1.57079632679489661923" />
+            <parent
+                link="link3" />
+            <child
+                link="link4" />
+            <axis
+                xyz="0 0 1" />
+            <limit
+                lower="-3.05"
+                upper="3.05"
+                effort="50"
+                velocity="10" />
+
+        </joint>
+        <link
+            name="link5">
+            <inertial>
+                <origin
+                    xyz="0 0.055 0.001"
+                    rpy="3.14159265358979323846 0 0" />
+                <mass
+                    value="2.732" />
+                <inertia
+                ixx="0.005"
+                iyy="0.003"
+                izz="0.005"
+                iyz="0"
+                ixz="0"
+                ixy="0" />
+            </inertial>
+            <visual>
+                <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0" />
+                <geometry>
+                    <mesh
+                        filename="package://chin_description/meshes/link5.STL" />
+                </geometry>
+                <material
+                    name="">
+                    <color
+                        rgba="0.7 0.7 0.7 1" />
+                </material>
+            </visual>
+            <collision>
+                <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0" />
+                <geometry>
+                    <mesh
+                        filename="package://chin_description/meshes/link5.STL" />
+                </geometry>
+            </collision>
+        </link>
+        <joint
+            name="joint5"
+            type="revolute">
+            <origin
+                xyz="0 -0.16975 0"
+                rpy="-1.57079632679489661923 0 0" />
+            <parent
+                link="link4" />
+            <child
+                link="link5" />
+            <axis
+                xyz="0 0 1" />
+            <limit
+                lower="-3.05"
+                upper="3.05"
+                effort="50"
+                velocity="10" />
+
+        </joint>
+        <link
+            name="link6">
+            <inertial>
+                <origin
+                    xyz="0 0 0.017"
+                    rpy="0 0 0" />
+                <mass
+                    value="0.28" />
+                <inertia
+                ixx="0.01"
+                iyy="0.01"
+                izz="0.01"
+                iyz="0"
+                ixz="0"
+                ixy="0" />
+            </inertial>
+            <visual>
+                <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0" />
+                <geometry>
+                    <mesh
+                        filename="package://chin_description/meshes/link6.STL" />
+                </geometry>
+                <material
+                    name="">
+                    <color
+                        rgba="0.7 0.7 0.7 1" />
+                </material>
+            </visual>
+            <collision>
+                <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0" />
+                <geometry>
+                    <mesh
+                        filename="package://chin_description/meshes/link6.STL" />
+                </geometry>
+            </collision>
+        </link>
+        <joint
+            name="joint6"
+            type="revolute">
+            <origin
+                xyz="0 0.14875 0"
+                rpy="1.57079632679489661923 0 0" />
+            <parent
+                link="link5" />
+            <child
+                link="link6" />
+            <axis
+                xyz="0 0 1" />
+            <limit
+                lower="-3.05"
+                upper="3.05"
+                effort="50"
+                velocity="10" />
+
+        </joint>
+
+</robot>
