@@ -38,12 +38,12 @@ int main() {
     u0 = 0.1*Eigen::MatrixXd::Ones(linear->u_dims, T);
 
     // Solve!
-    std::cout << "Run iLQR!" << std::endl; // 使用 std::cout
+    std::cout << "Run iLQR!" << std::endl;
     auto start = std::chrono::system_clock::now();
     ilqr->generate_trajectory(x0, xd, u0);
     auto now = std::chrono::system_clock::now();
     long int elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count();
-    std::cout << "iLQR took: " << elapsed / 1000.0 << " seconds." << std::endl; // 使用 std::cout
+    std::cout << "iLQR took: " << elapsed / 1000.0 << " seconds." << std::endl;
 
     return 0;
 }

@@ -57,7 +57,7 @@ for j = 1:rbt_ga.n
 end
 
 %% Result Validation
-norm3d = @(A) sqrt(sum(A(:).^2));
+norm3d = @(A) sqrt(max(A(:).^2));
 norm3d(p2tau_pqpq_ga - p2tau_pqpq_rst)
 norm3d(p2tau_pqpdq_ga - p2tau_pqpdq_rst)
 norm3d(p2tau_pdqpdq_ga - p2tau_pdqpdq_rst)

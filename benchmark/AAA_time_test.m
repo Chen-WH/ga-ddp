@@ -78,5 +78,4 @@ ylabel("Time(ms)");
 legend("GA", "SVA", "POE", "Location","best");
 set(gca,'FontName','Times New Roman');
 set(gca,'FontSize',11);
-saveas(gcf, "computing-efficiency.pdf");
-exportgraphics(gcf, "computing-efficiency.pdf",'ContentType','vector', 'BackgroundColor','none');
+saveas(gcf, "../images/benchmark.png");
