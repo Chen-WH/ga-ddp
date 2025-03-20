@@ -1,8 +1,8 @@
-#ifndef ILQR_CORE_HPP
-#define ILQR_CORE_HPP
+#ifndef __iLQG_core_h__
+#define __iLQG_core_h__
 
 #include "OC/model.hpp"
-#include "OC/boxqp.hpp"
+#include "OC/boxqp.h"
 #include <memory>
 #include <numeric>
 #include <stdexcept>
@@ -10,16 +10,16 @@
 
 namespace OC {
 
-class iLQR {
+class iLQG {
 public:
-  double dt = 0.01;  // time step
-  int maxIter = 50;  // maximum number of iterations
+  double dt = 0.01;      // time step
+  int maxIter = 100;     // maximum number of iterations
   Eigen::MatrixXd xs;    // nx(T+1)
   Eigen::MatrixXd us;    // mxT
 
-  iLQR(Model* p_dyn, Eigen::MatrixXd Q_k, Eigen::MatrixXd R_k, Eigen::MatrixXd Q_T);
+  iLQG(Model* p_dyn, Eigen::MatrixXd Q_k, Eigen::MatrixXd R_k, Eigen::MatrixXd Q_T);
 
-  ~iLQR() = default;
+  ~iLQG() = default;
 
   void generate_trajectory(Eigen::VectorXd& x_0, Eigen::VectorXd& x_d, Eigen::MatrixXd& u_0);
 
@@ -59,7 +59,7 @@ private:
 
   void init_traj();
 
-  void forward_pass(const Eigen::MatrixXd& u); // 添加 Eigen 命名空间
+  void forward_pass(const Eigen::MatrixXd& u);
 
   int backward_pass();
 };

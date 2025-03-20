@@ -1,4 +1,4 @@
-#include "OC/boxqp.hpp"
+#include "OC/boxqp.h"
 
 namespace OC {
 
@@ -101,8 +101,8 @@ BoxQPSolution boxQP(
 
         if (factorize){  // factorize if clamped has changed
             Hfree.resize(free_indices.size(), free_indices.size());
-            for (int i = 0; i < free_indices.size(); ++i) {
-                for(int j = 0; j < free_indices.size(); ++j){
+            for (size_t i = 0; i < free_indices.size(); ++i) {
+                for(size_t j = 0; j < free_indices.size(); ++j){
                     Hfree(i, j) = H(free_indices[i], free_indices[j]);
                 }
             }
@@ -130,14 +130,14 @@ BoxQPSolution boxQP(
         // 构建 grad_free
         grad_free.resize(free_indices.size());
         x_free.resize(free_indices.size());
-        for(int i = 0; i < free_indices.size(); ++i){
+        for(size_t i = 0; i < free_indices.size(); ++i){
             grad_free(i) = grad_clamped(free_indices[i]);
             x_free(i) = x(free_indices[i]);
         }
         // 计算搜索方向自由部分:
         p_free = -llt.solve(grad_free) - x_free;
         // 填充搜索方向
-        for(int i = 0;i < free_indices.size(); ++i){
+        for(size_t i = 0;i < free_indices.size(); ++i){
             search(free_indices[i]) = p_free(i);
         }
 

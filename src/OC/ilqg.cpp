@@ -1,6 +1,5 @@
-#include "OC/ilqr.hpp"
+#include "OC/ilqg.h"
 #include <algorithm>
-#include <omp.h>
 
 namespace OC {
 
@@ -9,16 +8,16 @@ double sgn(double val) {
     return (val > 0) - (val < 0);
 }
 
-std::vector<double> OC::iLQR::Alpha = {1.0000, 0.5012, 0.2512, 0.1259, 0.0631, 0.0316, 0.0158, 0.0079, 0.0040, 0.0020, 0.0010};
+std::vector<double> OC::iLQG::Alpha = {1.0000, 0.5012, 0.2512, 0.1259, 0.0631, 0.0316, 0.0158, 0.0079, 0.0040, 0.0020, 0.0010};
 
 // 定义静态常量变量
-constexpr double iLQR::lambdaFactor;
-constexpr double iLQR::lambdaMax;
-constexpr double iLQR::lambdaMin;
-constexpr double iLQR::zMin;
+constexpr double iLQG::lambdaFactor;
+constexpr double iLQG::lambdaMax;
+constexpr double iLQG::lambdaMin;
+constexpr double iLQG::zMin;
 
 // Constructor
-iLQR::iLQR(Model* p_dyn, Eigen::MatrixXd Q_k, Eigen::MatrixXd R_k, Eigen::MatrixXd Q_T) {
+iLQG::iLQG(Model* p_dyn, Eigen::MatrixXd Q_k, Eigen::MatrixXd R_k, Eigen::MatrixXd Q_T) {
   model.reset(p_dyn);
   Qk = Q_k;
   Rk = R_k;
@@ -27,7 +26,7 @@ iLQR::iLQR(Model* p_dyn, Eigen::MatrixXd Q_k, Eigen::MatrixXd R_k, Eigen::Matrix
 }
 
 // Initialize trajectory with control sequence
-void iLQR::init_traj() {
+void iLQG::init_traj() {
   cost_s = 0;
   xs.resize(model->x_dims, T + 1);
   xs.col(0) = x0;
@@ -55,7 +54,7 @@ void iLQR::init_traj() {
 }
 
 // Warm-start
-void iLQR::generate_trajectory(Eigen::VectorXd& x_0, Eigen::VectorXd& x_d, Eigen::MatrixXd& u_0) {
+void iLQG::generate_trajectory(Eigen::VectorXd& x_0, Eigen::VectorXd& x_d, Eigen::MatrixXd& u_0) {
   x0 = x_0;
   xd = x_d;
   T = u_0.cols();
@@ -136,7 +135,7 @@ void iLQR::generate_trajectory(Eigen::VectorXd& x_0, Eigen::VectorXd& x_d, Eigen
 
     // serial backtracking line-search
     if (backPassDone) { 
-      for (int i = 0; i < Alpha.size(); ++i) {
+      for (size_t i = 0; i < Alpha.size(); ++i) {
         alpha = Alpha[i];
         
         u_ff = us + alpha*k;
@@ -171,7 +170,7 @@ void iLQR::generate_trajectory(Eigen::VectorXd& x_0, Eigen::VectorXd& x_d, Eigen
     //--------------------------------------------------------------------------
     // STEP 4: accept step (or not), print status
     // 输出迭代信息
-    // std::cout << "Iter: " << iter << " Cost: " << cost_s << " reduction: " << dcost << " expected: " << expected << " gradient: " << g_norm << " log10(lambda): " << log10(lambda) << std::endl;
+    std::cout << "Iter: " << iter << " Cost: " << cost_s << " reduction: " << dcost << " expected: " << expected << " gradient: " << g_norm << " log10(lambda): " << log10(lambda) << std::endl;
 
     if (fwdPassDone) {
 
@@ -222,7 +221,7 @@ void iLQR::generate_trajectory(Eigen::VectorXd& x_0, Eigen::VectorXd& x_d, Eigen
 } //generate_trajectory
 
 // forward-pass (rollout)
-void iLQR::forward_pass(const Eigen::MatrixXd& u) {
+void iLQG::forward_pass(const Eigen::MatrixXd& u) {
   cost_new = 0;
   xnew.resize(model->x_dims, T + 1);
   unew.resize(model->u_dims, T);
@@ -240,7 +239,7 @@ void iLQR::forward_pass(const Eigen::MatrixXd& u) {
 }
 
 // Perform the Ricatti-Mayne backward pass
-int iLQR::backward_pass() {
+int iLQG::backward_pass() {
 
   dV.setZero();
 
