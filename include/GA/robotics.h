@@ -13,6 +13,11 @@ class robot {
 public:
   std::string model;               // 机器人型号
   double g;                        // 重力加速度
+  int n;                           // 机器人自由度
+  Eigen::MatrixXd Mj;              // 8x(n+1) 初始连杆 motor
+  Eigen::MatrixXd Lj;              // 6xn 关节轴线
+  Eigen::VectorXi type;            // 1xn 关节类型
+  std::vector<Eigen::MatrixXd> Ij; // 6x6xn 广义惯量矩阵
 
   // 构造函数
   robot(const std::string& robot_model, double gravity = 9.81);
@@ -22,6 +27,9 @@ public:
 
   // 正运动学：计算末端执行器相对于基座的位姿
   Eigen::VectorXd fkine(const Eigen::VectorXd& q);
+
+  // Geometric 雅可比：计算末端执行器的雅可比矩阵
+  Eigen::MatrixXd jacob_G(const Eigen::VectorXd& q);
 
   // 逆动力学：计算机器人各关节的力矩
   Eigen::VectorXd idyn(const Eigen::VectorXd& q, const Eigen::VectorXd& dq, const Eigen::VectorXd& ddq, const Eigen::VectorXd& fext);
@@ -35,12 +43,6 @@ public:
   // 正动力学一阶偏导：计算机器人各关节加速度对关节位置、速度、力矩的偏导
   void fdyn_fo(const Eigen::VectorXd& q, const Eigen::VectorXd& dq, const Eigen::VectorXd& tau, const Eigen::VectorXd& fext, Eigen::MatrixXd& pddq_pq, Eigen::MatrixXd& pddq_pdq, Eigen::MatrixXd& pddq_ptau);
 
-private:
-  int n;                           // 机器人自由度
-  Eigen::MatrixXd Mj;              // 8x(n+1) 初始连杆 motor
-  Eigen::MatrixXd Lj;              // 6xn 关节轴线
-  Eigen::VectorXi type;            // 1xn 关节类型
-  std::vector<Eigen::MatrixXd> Ij; // 6x6xn 广义惯量矩阵
 };
 
 } // namespace GA

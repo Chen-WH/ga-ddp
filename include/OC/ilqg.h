@@ -13,7 +13,7 @@ namespace OC {
 class iLQG {
 public:
   double dt = 0.01;      // time step
-  int maxIter = 100;     // maximum number of iterations
+  int maxIter = 50;      // maximum number of iterations
   Eigen::MatrixXd xs;    // nx(T+1)
   Eigen::MatrixXd us;    // mxT
 

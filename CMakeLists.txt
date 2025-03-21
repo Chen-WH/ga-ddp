@@ -37,8 +37,8 @@ target_link_libraries(GA_test GA)
 add_executable(iLQG_linear_test test/iLQG_linear_test.cpp)
 target_link_libraries(iLQG_linear_test GA OC OpenMP::OpenMP_CXX)
 
-# add_executable(iLQR_robot_test tests/iLQR_robot_test.cpp)
-# target_link_libraries(iLQR_robot_test ${COMMON_LIBS})
+add_executable(iLQG_robot_test test/iLQG_robot_test.cpp)
+target_link_libraries(iLQG_robot_test GA OC OpenMP::OpenMP_CXX)
 
 # add_executable(robot_mpc_test tests/robot_mpc_test.cpp)
 # ament_target_dependencies(robot_mpc_test rclcpp sensor_msgs trajectory_msgs)
@@ -48,8 +48,7 @@ target_link_libraries(iLQG_linear_test GA OC OpenMP::OpenMP_CXX)
 install(TARGETS
     GA_test
     iLQG_linear_test
-#     iLQR_boxqp_test
-#     iLQR_robot_test
+    iLQG_robot_test
 #     robot_mpc_test
   DESTINATION lib/${PROJECT_NAME}
 )

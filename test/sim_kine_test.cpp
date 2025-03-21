@@ -1,4 +1,4 @@
-#include "OC/ilqr.hpp"
+#include "OC/ilqg.h"
 #include "OC/robot.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"

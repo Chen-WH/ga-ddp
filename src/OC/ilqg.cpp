@@ -170,7 +170,7 @@ void iLQG::generate_trajectory(Eigen::VectorXd& x_0, Eigen::VectorXd& x_d, Eigen
     //--------------------------------------------------------------------------
     // STEP 4: accept step (or not), print status
     // 输出迭代信息
-    std::cout << "Iter: " << iter << " Cost: " << cost_s << " reduction: " << dcost << " expected: " << expected << " gradient: " << g_norm << " log10(lambda): " << log10(lambda) << std::endl;
+    // std::cout << "Iter: " << iter << " Cost: " << cost_s << " reduction: " << dcost << " expected: " << expected << " gradient: " << g_norm << " log10(lambda): " << log10(lambda) << std::endl;
 
     if (fwdPassDone) {
 

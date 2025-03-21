@@ -1,25 +1,25 @@
-#ifndef UTILS_CubicSpline_HPP
+#ifndef Utils_CubicSpline_HPP
 #define Utils_CubicSpline_HPP
 
 #include <Eigen/Dense>
 #include <cmath>
 
 void CubicSpline(const Eigen::VectorXd& x, const Eigen::VectorXd& y, const Eigen::VectorXd& u, double dx0, double dxn, Eigen::VectorXd& v, Eigen::VectorXd& dv, Eigen::VectorXd& ddv) {
-    size_t n = x.size();
+    int n = x.size();
     assert(y.size() == n);
     assert(n >= 2);
 
     Eigen::VectorXd dx(n - 1), dy(n - 1);
-    for (size_t i = 0; i < n - 1; ++i) {
+    for (int i = 0; i < n - 1; ++i) {
         dx[i] = x[i + 1] - x[i];
-        dy[i] = y[i + 1] - x[i];
+        dy[i] = y[i + 1] - y[i];
     }
 
     // Construct coefficient matrix A and right-hand side vector t
     Eigen::MatrixXd A = Eigen::MatrixXd::Zero(n, n);
     Eigen::VectorXd t = Eigen::VectorXd::Zero(n);
 
-    for (size_t i = 1; i < n - 1; ++i) {
+    for (int i = 1; i < n - 1; ++i) {
         A(i, i - 1) = dx[i - 1];
         A(i, i) = 2 * (dx[i - 1] + dx[i]);
         A(i, i + 1) = dx[i];
@@ -39,13 +39,13 @@ void CubicSpline(const Eigen::VectorXd& x, const Eigen::VectorXd& y, const Eigen
 
     // Calculate b and d coefficients
     Eigen::VectorXd b(n - 1), d(n - 1);
-    for (size_t i = 0; i < n - 1; ++i) {
+    for (int i = 0; i < n - 1; ++i) {
         b[i] = dy[i] / dx[i] - dx[i] * (2 * c(i) + c(i + 1)) / 3.0;
         d[i] = (c(i + 1) - c(i)) / (3 * dx[i]);
     }
-    size_t idx = 0;
+    int idx = 0;
     double e;
-    for (size_t i = 0; i < u.size(); ++i) {
+    for (int i = 0; i < u.size(); ++i) {
         if (u[i] > x[idx + 1]) {
             idx += 1;
         }
