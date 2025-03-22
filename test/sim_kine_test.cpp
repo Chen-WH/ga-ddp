@@ -1,5 +1,5 @@
 #include "OC/ilqg.h"
-#include "OC/model.hpp"
+#include "Utils/cubic_spline.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "trajectory_msgs/msg/joint_trajectory.hpp"
@@ -18,39 +18,40 @@ void current_states_callback(const sensor_msgs::msg::JointState::SharedPtr msg) 
 
 int main(int argc, char *argv[]) {
     rclcpp::init(argc, argv);
-    auto node = rclcpp::Node::make_shared("robot_ilqr_test");
+    auto node = rclcpp::Node::make_shared("robot_ilqg_test");
     auto trajectory_publisher = node->create_publisher<trajectory_msgs::msg::JointTrajectory>("/joint_trajectory", 10);
     auto target_publisher = node->create_publisher<sensor_msgs::msg::JointState>("/desired_states", 10);
     auto states_subscriber = node->create_subscription<sensor_msgs::msg::JointState>("/current_states", 10, current_states_callback);
     
     // 初始化chin机器人
-    GA::GA_robot GA_rbt("chin");
-    OC::iLQR* ilqr;
-    OC::Model* rbt = new OC::Robot("chin");
+    GA::GA_robot GA_rbt("jaka");
+    OC::iLQG* ilqg;
+    OC::Model* rbt = new OC::Robot("jaka");
 
-    // 初始化iLQR
+    // 初始化iLQG
     Eigen::MatrixXd Q_k = 0.1*Eigen::MatrixXd::Identity(rbt->x_dims, rbt->x_dims);
     Q_k.block(0, 0, 6, 6) = 10 * Eigen::MatrixXd::Identity(6, 6);
     Eigen::MatrixXd R_k = Eigen::MatrixXd::Zero(rbt->u_dims, rbt->u_dims);
     Eigen::MatrixXd Q_T = Q_k;
-    ilqr = new OC::iLQR(rbt, Q_k, R_k, Q_T);
+    ilqg = new OC::iLQG(rbt, Q_k, R_k, Q_T);
+    ilqg->dt = 0.01;
 
     // Define initial state
     Eigen::VectorXd x0(rbt->x_dims);
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
     Eigen::VectorXd xd(rbt->x_dims);
     Eigen::VectorXd qd = Eigen::VectorXd::Zero(rbt->u_dims);
-    //qd(1) += M_PI_2; qd(3) += M_PI_2;
+    qd(1) += M_PI_2; qd(3) += M_PI_2;
     Eigen::VectorXd dqd = Eigen::VectorXd::Zero(rbt->u_dims);
     xd << qd, dqd;
     Eigen::VectorXd fext = Eigen::VectorXd::Zero(rbt->u_dims);
 
     // Make initialization for control sequence
-    int T = 50;
+    int T = 100;
     Eigen::VectorXd x(4);
-    x << 0, 0.15*T*ilqr->dt, 0.85*T*ilqr->dt, T*ilqr->dt;
+    x << 0, 0.15*T*ilqg->dt, 0.85*T*ilqg->dt, T*ilqg->dt;
     Eigen::VectorXd y(4);
-    Eigen::VectorXd u = Eigen::VectorXd::LinSpaced(T + 1, 0, T*ilqr->dt);
+    Eigen::VectorXd u = Eigen::VectorXd::LinSpaced(T + 1, 0, T*ilqg->dt);
     Eigen::MatrixXd q = Eigen::MatrixXd::Zero(rbt->u_dims, T + 1);
     Eigen::MatrixXd dq = Eigen::MatrixXd::Zero(rbt->u_dims, T + 1);
     Eigen::MatrixXd ddq = Eigen::MatrixXd::Zero(rbt->u_dims, T + 1);
@@ -94,8 +95,8 @@ int main(int argc, char *argv[]) {
             tau.col(i) = GA_rbt.idyn(q.col(i), dq.col(i), ddq.col(i), fext);
         }
 
-        // Solve iLQR
-        ilqr->generate_trajectory(x0, xd, tau);
+        // Solve iLQG
+        ilqg->generate_trajectory(x0, xd, tau);
 
         // Publish desired states
         sensor_msgs::msg::JointState desired_states;
@@ -107,10 +108,10 @@ int main(int argc, char *argv[]) {
 
         // Publish trajectory
         for (int i = 0; i < T; ++i) {
-            position = ilqr->xs.col(i + 1).head(6);
-            velocity = ilqr->xs.col(i + 1).tail(6);
-            effort = ilqr->us.col(i);
-            point.time_from_start = rclcpp::Duration::from_seconds(i * ilqr->dt);
+            position = ilqg->xs.col(i + 1).head(6);
+            velocity = ilqg->xs.col(i + 1).tail(6);
+            effort = ilqg->us.col(i);
+            point.time_from_start = rclcpp::Duration::from_seconds(i * ilqg->dt);
             point.positions = std::vector<double>(position.data(), position.data() + 6);
             point.velocities = std::vector<double>(velocity.data(), velocity.data() + 6);
             point.effort = std::vector<double>(effort.data(), effort.data() + 6);

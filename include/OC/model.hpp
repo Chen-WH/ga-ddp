@@ -120,8 +120,8 @@ public:
       u_max << M_PI, M_PI, M_PI, M_PI, M_PI, M_PI;
     }
     else if (robot_model == "jaka") {
-      u_min << -M_PI, -M_PI, -M_PI, -M_PI, -M_PI, -M_PI;
-      u_max << M_PI, M_PI, M_PI, M_PI, M_PI, M_PI;
+      u_min << -2*M_PI/3, -2*M_PI/3, -M_PI, -M_PI, -M_PI, -M_PI;
+      u_max << 2*M_PI/3, 2*M_PI/3, M_PI, M_PI, M_PI, M_PI;
     }
   }
 
@@ -143,6 +143,56 @@ public:
     Eigen::VectorXd q = x.tail(u_dims);
     Eigen::MatrixXd J = GA_rbt.jacob_G(q);
     fu << -dt * J, dt*Eigen::MatrixXd::Identity(u_dims, u_dims);
+    return;
+  }
+};
+
+class Robot_dyn : public Model { // x = [psi, q, dq], u = tau
+public:
+  GA::robot GA_rbt;
+
+  Robot(const std::string& robot_model) : GA_rbt(robot_model) {
+    x_dims = 6 + 2*GA_rbt.n;
+    u_dims = GA_rbt.n;
+    u_min = Eigen::VectorXd(u_dims); u_max = Eigen::VectorXd(u_dims);
+    if (robot_model == "chin") {
+      u_min << -150, -75, -75, -37.5, -37.5, -37.5;
+      u_max << 150, 75, 75, 37.5, 37.5, 37.5;
+    }
+    else if (robot_model == "jaka") {
+      u_min << -30, -120, -120, -30, -45, -15;
+      u_max <<  30,  120,  120,  30,  45,  15;
+    }
+  }
+
+  virtual Eigen::VectorXd dynamics(const Eigen::VectorXd& x, const Eigen::VectorXd& u, const double dt) override {
+    Eigen::VectorXd f(x_dims);
+    Eigen::VectorXd psi = x.head(6), q = x.segment(6, u_dims), dq = x.tail(u_dims);
+    Eigen::VectorXd M = GA_rbt.fkine(q);
+    Eigen::VectorXd ddq = GA_rbt.fdyn(q, dq, u, Eigen::VectorXd::Zero(u_dims));
+
+    Eigen::VectorXd dq_new = dq + dt*ddq;
+    Eigen::VectorXd q_new = q + dt*dq_new;
+    Eigen::VectorXd M_new = GA_rbt.fkine(q_new);
+    Eigen::VectorXd psi_new = ga_log(ga_prodM(ga_prodM(M_new, ga_rev(M)), ga_exp(psi)));
+    f << psi_new, q_new, dq_new;
+    return f;
+  }
+
+  virtual void dynamics_fo(const Eigen::VectorXd& x, const Eigen::VectorXd& u, const double dt, Eigen::MatrixXd& fx, Eigen::MatrixXd& fu) override {
+    fx.resize(x_dims, x_dims);
+    fu.resize(x_dims, u_dims);
+    Eigen::VectorXd q = x.segment(6, u_dims), dq = x.tail(u_dims);
+    Eigen::MatrixXd J = GA_rbt.jacob_G(q);
+    Eigen::MatrixXd pddq_pq, pddq_pdq, pddq_ptau;
+    GA_rbt.fdyn_fo(q, dq, u, Eigen::VectorXd::Zero(u_dims), pddq_pq, pddq_pdq, pddq_ptau);
+    fx.block(0, 0, 6 + u_dims, 6 + u_dims) = Eigen::MatrixXd::Identity(6 + u_dims, 6 + u_dims);
+    fx.block(0, 6 + u_dims, 6, u_dims) = -h * J;
+    fx.block(6, 6 + u_dims, u_dims, u_dims) = h * Eigen::MatrixXd::Identity(u_dims, u_dims);
+    fx.block(6 + u_dims, 0, u_dims, 6) = Eigen::MatrixXd::Zero(u_dims, 6);
+    fx.block(6 + u_dims, 6, u_dims, u_dims) = h * pddq_pq;
+    fx.block(6 + u_dims, 6 + u_dims, u_dims, u_dims) = Eigen::MatrixXd::Identity(u_dims, u_dims) + h * pddq_pdq;
+    fu << Eigen::MatrixXd::Zero(6 + u_dims, u_dims), dt*pddq_ptau;
     return;
   }
 };

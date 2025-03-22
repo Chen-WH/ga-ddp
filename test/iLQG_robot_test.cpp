@@ -1,5 +1,4 @@
 #include "OC/ilqg.h"
-#include "OC/model.hpp"
 #include "Utils/cubic_spline.hpp"
 
 int main() {
