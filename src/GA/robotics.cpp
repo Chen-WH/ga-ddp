@@ -144,7 +144,7 @@ Eigen::MatrixXd robot::jacob_G(const Eigen::VectorXd& q) {
   Eigen::VectorXd M = Mj.col(0);
   J.col(0) = -pga_frame2(Lj.col(0), M) / 2;
   for (int i = 1; i < n; ++i) {
-    M = ga_prodM(M, ga_motor(Lj.col(i - 1), q(i - 1), type(i - 1)), Mj.col(i));
+    M = ga_prodM(ga_prodM(M, ga_motor(Lj.col(i - 1), q(i - 1), type(i - 1))), Mj.col(i));
     J.col(i) = -pga_frame2(Lj.col(i), M) / 2;
   }
   return J;
@@ -270,62 +270,60 @@ void robot::idyn_fo(const Eigen::VectorXd& q, const Eigen::VectorXd& dq, const E
     V.col(k) = pga_frame2(V.col(k - 1), Mt.col(k)) + dq(k) * Lj.col(k);
     dV.col(k) = pga_frame2(dV.col(k - 1), Mt.col(k)) - dq(k) * pga_Lie2(Lj.col(k), V.col(k)) + ddq(k) * Lj.col(k);
     adL = ga_adB(Lj.col(k));
-    
+
     // first-order pass
-    for (int i = 0; i < n; ++i) {
-      if (i != k) {
-        pV_pq[k].col(i) = pga_frame2(pV_pq[k - 1].col(i), Mt.col(k));
-        pV_pdq[k].col(i) = pga_frame2(pV_pdq[k - 1].col(i), Mt.col(k));
-        pdV_pq[k].col(i) = pga_frame2(pdV_pq[k - 1].col(i), Mt.col(k)) + pga_Lie2(dq(k) * pV_pq[k].col(i), Lj.col(k));
-        pdV_pdq[k].col(i) = pga_frame2(pdV_pdq[k - 1].col(i), Mt.col(k)) + pga_Lie2(dq(k) * pV_pdq[k].col(i), Lj.col(k));
-        pdV_pddq[k].col(i) = pga_frame2(pdV_pddq[k - 1].col(i), Mt.col(k));
-      } else {
-        pV_pq[k].col(i) = pga_frame2(pV_pq[k - 1].col(i), Mt.col(k)) + pga_Lie2(V.col(k), Lj.col(k));
-        pV_pdq[k].col(i) = pga_frame2(pV_pdq[k - 1].col(i), Mt.col(k)) + Lj.col(k);
-        pdV_pq[k].col(i) = pga_frame2(pdV_pq[k - 1].col(i), Mt.col(k)) + pga_Lie2(pga_frame2(dV.col(k - 1), Mt.col(k)) + dq(k) * pV_pq[k].col(i), Lj.col(k));
-        pdV_pdq[k].col(i) = pga_frame2(pdV_pdq[k - 1].col(i), Mt.col(k)) + pga_Lie2(dq(k) * pV_pdq[k].col(i) + V.col(k), Lj.col(k));
-        pdV_pddq[k].col(i) = pga_frame2(pdV_pddq[k - 1].col(i), Mt.col(k)) + Lj.col(k);
-      }
-    }
+    pV_pq[k].leftCols(k+1) = AdM * pV_pq[k - 1].leftCols(k+1);
+    pV_pq[k].col(k) = pV_pq[k].col(k) - pga_Lie2(Lj.col(k), V.col(k)); // i == k case
+
+    pV_pdq[k].leftCols(k+1) = AdM * pV_pdq[k - 1].leftCols(k+1);
+    pV_pdq[k].col(k) = pV_pdq[k].col(k) + Lj.col(k); // i == k case
+
+    pdV_pq[k].leftCols(k+1) = AdM * pdV_pq[k - 1].leftCols(k+1) - dq(k) * adL * pV_pq[k].leftCols(k+1);
+    pdV_pq[k].col(k) = pdV_pq[k].col(k) - pga_Lie2(Lj.col(k), pga_frame2(dV.col(k - 1), Mt.col(k))); // i == k case
+
+    pdV_pdq[k].leftCols(k+1) = AdM * pdV_pdq[k - 1].leftCols(k+1) - dq(k) * adL * pV_pdq[k].leftCols(k+1);
+    pdV_pdq[k].col(k) = pdV_pdq[k].col(k) - pga_Lie2(Lj.col(k), V.col(k)); // i == k case
+    
+    pdV_pddq[k].leftCols(k+1) = AdM * pdV_pddq[k - 1].leftCols(k+1);
+    pdV_pddq[k].col(k) = pdV_pddq[k].col(k) + Lj.col(k); // i == k case
   }
 
   // Backward iterations
-  F.col(n - 1) = -pga_frame2(fext, Mj.col(n)) + Ij[n - 1] * dV.col(n - 1) - pga_Lie2(Ij[n - 1] * V.col(n - 1), V.col(n - 1));
-  for (int i = 0; i < n; ++i) {
-      pF_pq[n - 1].col(i) = Ij[n - 1] * pdV_pq[n - 1].col(i) - pga_Lie2(Ij[n - 1] * V.col(n - 1), pV_pq[n - 1].col(i)) - pga_Lie2(Ij[n - 1] * pV_pq[n - 1].col(i), V.col(n - 1));
-      pF_pdq[n - 1].col(i) = Ij[n - 1] * pdV_pdq[n - 1].col(i) - pga_Lie2(Ij[n - 1] * V.col(n - 1), pV_pdq[n - 1].col(i)) - pga_Lie2(Ij[n - 1] * pV_pdq[n - 1].col(i), V.col(n - 1));
-      pF_pddq[n - 1].col(i) = Ij[n - 1] * pdV_pddq[n - 1].col(i);
-      ptau_pq(n - 1, i) = ga_metric(Lj.col(n - 1)) * pF_pq[n - 1].col(i);
-      ptau_pdq(n - 1, i) = ga_metric(Lj.col(n - 1)) * pF_pdq[n - 1].col(i);
-      ptau_pddq(n - 1, i) = ga_metric(Lj.col(n - 1)) * pF_pddq[n - 1].col(i);
-  }
+  F.col(n - 1) = pga_frame2(fext, Mj.col(n)) + Ij[n - 1] * dV.col(n - 1) - pga_Lie2(Ij[n - 1] * V.col(n - 1), V.col(n - 1));
+  adIV = ga_adB(Ij[n - 1] * V.col(n - 1));
+  adV = ga_adB(V.col(n - 1));
+
+  pF_pq[n - 1] = Ij[n - 1] * pdV_pq[n - 1] - adIV * pV_pq[n - 1] + adV * Ij[n - 1] * pV_pq[n - 1];
+  pF_pdq[n - 1] = Ij[n - 1] * pdV_pdq[n - 1] - adIV * pV_pdq[n - 1] + adV * Ij[n - 1] * pV_pdq[n - 1];
+  pF_pddq[n - 1] = Ij[n - 1] * pdV_pddq[n - 1];
+  ptau_pq.row(n - 1) = ga_metric(Lj.col(n - 1)) * pF_pq[n - 1];
+  ptau_pdq.row(n - 1) = ga_metric(Lj.col(n - 1)) * pF_pdq[n - 1];
+  ptau_pddq.row(n - 1) = ga_metric(Lj.col(n - 1)) * pF_pddq[n - 1];
+
   for (int k = n - 2; k >= 0; --k) {
-      F.col(k) = pga_frame2(F.col(k + 1), M.col(k + 1)) + Ij[k] * dV.col(k) - pga_Lie2(Ij[k] * V.col(k), V.col(k));
-      for (int i = 0; i < n; ++i) {
-          if (i != k + 1) {
-              pF_pq[k].col(i) = pga_frame2(pF_pq[k + 1].col(i), M.col(k + 1)) + Ij[k] * pdV_pq[k].col(i) - pga_Lie2(Ij[k] * V.col(k), pV_pq[k].col(i)) - pga_Lie2(Ij[k] * pV_pq[k].col(i), V.col(k));
-              pF_pdq[k].col(i) = pga_frame2(pF_pdq[k + 1].col(i), M.col(k + 1)) + Ij[k] * pdV_pdq[k].col(i) - pga_Lie2(Ij[k] * V.col(k), pV_pdq[k].col(i)) - pga_Lie2(Ij[k] * pV_pdq[k].col(i), V.col(k));
-              pF_pddq[k].col(i) = pga_frame2(pF_pddq[k + 1].col(i), M.col(k + 1)) + Ij[k] * pdV_pddq[k].col(i);
-          } else {
-              pF_pq[k].col(i) = pga_frame2(pF_pq[k + 1].col(i) + pga_Lie2(Lj.col(k + 1), F.col(k + 1)), M.col(k + 1)) + Ij[k] * pdV_pq[k].col(i) - pga_Lie2(Ij[k] * V.col(k), pV_pq[k].col(i)) - pga_Lie2(Ij[k] * pV_pq[k].col(i), V.col(k));
-              pF_pdq[k].col(i) = pga_frame2(pF_pdq[k + 1].col(i), M.col(k + 1)) + Ij[k] * pdV_pdq[k].col(i) - pga_Lie2(Ij[k] * V.col(k), pV_pdq[k].col(i)) - pga_Lie2(Ij[k] * pV_pdq[k].col(i), V.col(k));
-              pF_pddq[k].col(i) = pga_frame2(pF_pddq[k + 1].col(i), M.col(k + 1)) + Ij[k] * pdV_pddq[k].col(i);
-          }
-          ptau_pq(k, i) = ga_metric(Lj.col(k)) * pF_pq[k].col(i);
-          ptau_pdq(k, i) = ga_metric(Lj.col(k)) * pF_pdq[k].col(i);
-          ptau_pddq(k, i) = ga_metric(Lj.col(k)) * pF_pddq[k].col(i);
-      }
+    AdM = ga_AdM(M.col(k + 1));
+    F.col(k) = pga_frame2(F.col(k + 1), M.col(k + 1)) + Ij[k] * dV.col(k) - pga_Lie2(Ij[k] * V.col(k), V.col(k));
+    adIV = ga_adB(Ij[k] * V.col(k));
+    adV = ga_adB(V.col(k));
+
+    pF_pq[k] = AdM * pF_pq[k + 1] + Ij[k] * pdV_pq[k] - adIV * pV_pq[k] + adV * Ij[k] * pV_pq[k];
+    pF_pq[k].col(k + 1) = pF_pq[k].col(k + 1) + pga_frame2(pga_Lie2(Lj.col(k + 1), F.col(k + 1)), M.col(k + 1)); // i == k+1 case
+    pF_pdq[k] = AdM * pF_pdq[k + 1] + Ij[k] * pdV_pdq[k] - adIV * pV_pdq[k] + adV * Ij[k] * pV_pdq[k];
+    pF_pddq[k] = AdM * pF_pddq[k + 1] + Ij[k] * pdV_pddq[k];
+
+    ptau_pq.row(k) = ga_metric(Lj.col(k)) * pF_pq[k];
+    ptau_pdq.row(k) = ga_metric(Lj.col(k)) * pF_pdq[k];
+    ptau_pddq.row(k) = ga_metric(Lj.col(k)) * pF_pddq[k];
   }
-  return;
 }
 
 void robot::fdyn_fo(const Eigen::VectorXd& q, const Eigen::VectorXd& dq, const Eigen::VectorXd& tau, const Eigen::VectorXd& fext, Eigen::MatrixXd& pddq_pq, Eigen::MatrixXd& pddq_pdq, Eigen::MatrixXd& pddq_ptau) {
-    Eigen::VectorXd ddq = robot::fdyn(q, dq, tau, fext);
-    Eigen::MatrixXd ptau_pq, ptau_pdq, ptau_pddq;
-    robot::idyn_fo(q, dq, ddq, fext, ptau_pq, ptau_pdq, ptau_pddq);
-    pddq_ptau = ptau_pddq.inverse();
-    pddq_pq = -pddq_ptau * ptau_pq;
-    pddq_pdq = -pddq_ptau * ptau_pdq;
+  Eigen::VectorXd ddq = robot::fdyn(q, dq, tau, fext);
+  Eigen::MatrixXd ptau_pq, ptau_pdq, ptau_pddq;
+  robot::idyn_fo(q, dq, ddq, fext, ptau_pq, ptau_pdq, ptau_pddq);
+  pddq_ptau = ptau_pddq.inverse();
+  pddq_pq = -pddq_ptau * ptau_pq;
+  pddq_pdq = -pddq_ptau * ptau_pdq;
 }
 
 } // namespace GA

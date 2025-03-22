@@ -108,41 +108,44 @@ public:
 };
 
 class Robot_kine : public Model { // x = [psi, q], u = dq
-  public:
-    GA::robot GA_rbt;
-  
-    Robot_kine(const std::string& robot_model) : GA_rbt(robot_model) {
-      x_dims = 6 + GA_rbt.n;
-      u_dims = GA_rbt.n;
-      u_min = Eigen::VectorXd(u_dims); u_max = Eigen::VectorXd(u_dims);
-      if (robot_model == "chin") {
-        u_min << -M_PI, -M_PI, -M_PI, -M_PI, -M_PI, -M_PI;
-        u_max << M_PI, M_PI, M_PI, M_PI, M_PI, M_PI;
-      }
-      else if (robot_model == "jaka") {
-        u_min << -M_PI, -M_PI, -M_PI, -M_PI, -M_PI, -M_PI;
-        u_max << M_PI, M_PI, M_PI, M_PI, M_PI, M_PI;
-      }
+public:
+  GA::robot GA_rbt;
+
+  Robot_kine(const std::string& robot_model) : GA_rbt(robot_model) {
+    x_dims = 6 + GA_rbt.n;
+    u_dims = GA_rbt.n;
+    u_min = Eigen::VectorXd(u_dims); u_max = Eigen::VectorXd(u_dims);
+    if (robot_model == "chin") {
+      u_min << -M_PI, -M_PI, -M_PI, -M_PI, -M_PI, -M_PI;
+      u_max << M_PI, M_PI, M_PI, M_PI, M_PI, M_PI;
     }
-  
-    virtual Eigen::VectorXd dynamics(const Eigen::VectorXd& x, const Eigen::VectorXd& u, const double dt) override {
-      Eigen::VectorXd f(x_dims);
-      Eigen::VectorXd q = x.head(6), dq = x.tail(u_dims);
-      f << q + dt*dq, dq + dt*GA_rbt.fdyn(q, dq, u, Eigen::VectorXd::Zero(6));
-      return f;
+    else if (robot_model == "jaka") {
+      u_min << -M_PI, -M_PI, -M_PI, -M_PI, -M_PI, -M_PI;
+      u_max << M_PI, M_PI, M_PI, M_PI, M_PI, M_PI;
     }
-  
-    virtual void dynamics_fo(const Eigen::VectorXd& x, const Eigen::VectorXd& u, const double dt, Eigen::MatrixXd& fx, Eigen::MatrixXd& fu) override {
-      fx.resize(x_dims, x_dims);
-      fu.resize(x_dims, u_dims);
-      Eigen::VectorXd q = x.head(u_dims), dq = x.tail(6);
-      Eigen::MatrixXd pddq_pq, pddq_pdq, pddq_ptau;
-      GA_rbt.fdyn_fo(q, dq, u, Eigen::VectorXd::Zero(6), pddq_pq, pddq_pdq, pddq_ptau);
-      fx << Eigen::MatrixXd::Identity(6, 6), dt*Eigen::MatrixXd::Identity(6, 6), dt*pddq_pq, Eigen::MatrixXd::Identity(6, 6) + dt*pddq_pdq;
-      fu << Eigen::MatrixXd::Zero(6, 6), dt*pddq_ptau;
-      return;
-    }
-  };
+  }
+
+  virtual Eigen::VectorXd dynamics(const Eigen::VectorXd& x, const Eigen::VectorXd& u, const double dt) override {
+    Eigen::VectorXd f(x_dims);
+    Eigen::VectorXd psi = x.head(6), q = x.tail(u_dims);
+    Eigen::VectorXd M = GA_rbt.fkine(q);
+
+    Eigen::VectorXd q_new = q + dt*u;
+    Eigen::VectorXd M_new = GA_rbt.fkine(q_new);
+    Eigen::VectorXd psi_new = ga_log(ga_prodM(ga_prodM(M_new, ga_rev(M)), ga_exp(psi)));
+    f << psi_new, q_new;
+    return f;
+  }
+
+  virtual void dynamics_fo(const Eigen::VectorXd& x, const Eigen::VectorXd& u, const double dt, Eigen::MatrixXd& fx, Eigen::MatrixXd& fu) override {
+    fx = Eigen::MatrixXd::Identity(x_dims, x_dims);
+    fu.resize(x_dims, u_dims);
+    Eigen::VectorXd q = x.tail(u_dims);
+    Eigen::MatrixXd J = GA_rbt.jacob_G(q);
+    fu << -dt * J, dt*Eigen::MatrixXd::Identity(u_dims, u_dims);
+    return;
+  }
+};
 
 } // namespace OC
 

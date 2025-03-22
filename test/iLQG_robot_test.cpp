@@ -11,7 +11,8 @@ int main() {
   Eigen::MatrixXd Q_k = 10*Eigen::MatrixXd::Identity(rbt->x_dims, rbt->x_dims);
   Q_k.block(6, 6, 6, 6) = Eigen::MatrixXd::Zero(6, 6);
   Eigen::MatrixXd R_k = Eigen::MatrixXd::Zero(rbt->u_dims, rbt->u_dims);
-  Eigen::MatrixXd Q_T = 100 * Eigen::MatrixXd::Identity(rbt->x_dims, rbt->x_dims);
+  Eigen::MatrixXd Q_T = Q_k;
+  // Eigen::MatrixXd Q_T = 100 * Eigen::MatrixXd::Identity(rbt->x_dims, rbt->x_dims);
   ilqg = new OC::iLQG(rbt, Q_k, R_k, Q_T);
   ilqg->dt = 0.016;
 

@@ -1,5 +1,5 @@
 #include "OC/ilqg.h"
-#include "OC/robot.hpp"
+#include "OC/model.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "trajectory_msgs/msg/joint_trajectory.hpp"
