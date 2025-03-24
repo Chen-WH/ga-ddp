@@ -83,8 +83,8 @@ public:
       u_max << 150, 75, 75, 37.5, 37.5, 37.5;
     }
     else if (robot_model == "jaka") {
-      u_min << -30, -120, -120, -30, -45, -15;
-      u_max <<  30,  120,  120,  30,  45,  15;
+      u_min << -80, -80, -50, -15, -15, -5;
+      u_max <<  80,  80,  50,  15,  15,  5;
     }
   }
 
@@ -116,12 +116,12 @@ public:
     u_dims = GA_rbt.n;
     u_min = Eigen::VectorXd(u_dims); u_max = Eigen::VectorXd(u_dims);
     if (robot_model == "chin") {
-      u_min << -M_PI, -M_PI, -M_PI, -M_PI, -M_PI, -M_PI;
-      u_max << M_PI, M_PI, M_PI, M_PI, M_PI, M_PI;
-    }
-    else if (robot_model == "jaka") {
       u_min << -2*M_PI/3, -2*M_PI/3, -M_PI, -M_PI, -M_PI, -M_PI;
       u_max << 2*M_PI/3, 2*M_PI/3, M_PI, M_PI, M_PI, M_PI;
+    }
+    else if (robot_model == "jaka") {
+      u_min << -M_PI/3, -M_PI/3, -M_PI/3, -M_PI/3, -M_PI/3, -M_PI/3;
+      u_max <<  M_PI/3,  M_PI/3,  M_PI/3,  M_PI/3,  M_PI/3,  M_PI/3;
     }
   }
 

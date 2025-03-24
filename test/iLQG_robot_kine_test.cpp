@@ -18,11 +18,11 @@ int main() {
   // Set random seed for reproducibility
   std::srand(static_cast<unsigned int>(std::time(nullptr)));
   Eigen::VectorXd q0 = Eigen::VectorXd::Zero(rbt->u_dims);
-  q0 << 0.5944, 2.3504, -0.1554, 0.2633, -0.8514, 2.0885;
+  q0 << 0.0, M_PI_2, 0.0, M_PI_2, 0.0, 0.0;
   Eigen::VectorXd M0 = GA_rbt.fkine(q0);
 
   Eigen::VectorXd qd = Eigen::VectorXd::Random(rbt->u_dims);
-  qd << 1.0345, 0.591165, 1.3817, 0.501313, -1.0589, 0.789955;
+  qd << 1.0345, 0.591165, 1.3817, 0.501313, -1.0589, 1.4373;
   Eigen::VectorXd Md = GA_rbt.fkine(qd);
   
   Eigen::VectorXd x0(rbt->x_dims);
@@ -31,7 +31,7 @@ int main() {
   xd << Eigen::VectorXd::Zero(6), qd;
 
   // Make initialization for control sequence
-  int T = 50;
+  int T = 100;
   Eigen::MatrixXd u = ilqg->dt*Eigen::MatrixXd::Ones(rbt->u_dims, T);
 
   // Solve!
@@ -41,6 +41,12 @@ int main() {
   auto now = std::chrono::system_clock::now();
   long int elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count();
   std::cout << "iLQG took: " << elapsed / 1000.0 << " seconds." << std::endl;
+  // Output the maximum absolute value of us
+  std::cout << "Max absolute values of us:" << std::endl;
+  for (int i = 0; i < 6; ++i) {
+      std::cout << ilqg->us.row(i).cwiseAbs().maxCoeff() << std::endl;
+  }
+  std::cout << (ilqg->xs.col(T) - xd).head(6) << std::endl;
 
   return 0;
 }

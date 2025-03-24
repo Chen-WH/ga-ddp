@@ -22,7 +22,7 @@ iLQG::iLQG(Model* p_dyn, Eigen::MatrixXd Q_k, Eigen::MatrixXd R_k, Eigen::Matrix
   Qk = Q_k;
   Rk = R_k;
   QT = Q_T;
-  omp_set_num_threads(8);
+  omp_set_num_threads(6);
 }
 
 // Initialize trajectory with control sequence

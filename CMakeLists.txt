@@ -35,21 +35,24 @@ add_executable(GA_test test/GA_test.cpp)
 target_link_libraries(GA_test GA)
 
 add_executable(iLQG_linear_test test/iLQG_linear_test.cpp)
-target_link_libraries(iLQG_linear_test GA OC OpenMP::OpenMP_CXX)
+target_link_libraries(iLQG_linear_test OC OpenMP::OpenMP_CXX)
 
 add_executable(iLQG_robot_test test/iLQG_robot_test.cpp)
 target_link_libraries(iLQG_robot_test GA OC OpenMP::OpenMP_CXX)
 
-add_executable(sim_dyn_test test/sim_dyn_test.cpp)
-ament_target_dependencies(sim_dyn_test rclcpp sensor_msgs trajectory_msgs)
-target_link_libraries(sim_dyn_test GA OC OpenMP::OpenMP_CXX)
+add_executable(iLQG_robot_dyn_test test/iLQG_robot_dyn_test.cpp)
+target_link_libraries(iLQG_robot_dyn_test GA OC OpenMP::OpenMP_CXX)
+
+add_executable(iLQG_robot_kine_test test/iLQG_robot_kine_test.cpp)
+target_link_libraries(iLQG_robot_kine_test GA OC OpenMP::OpenMP_CXX)
 
 # Install targets
 install(TARGETS
     GA_test
     iLQG_linear_test
     iLQG_robot_test
-    sim_dyn_test
+    iLQG_robot_dyn_test
+    iLQG_robot_kine_test
   DESTINATION lib/${PROJECT_NAME}
 )
 

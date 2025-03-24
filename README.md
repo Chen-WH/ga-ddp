@@ -19,7 +19,7 @@ Compiling tests passed on Ubuntu 22.04 with ROS2 Humble installed. You can just 
 
 ```shell
 sudo apt-get install libeigen3-dev
-git clone git@github.com:Chen-WH/GA-DDP.git
+git clone git@github.com:Chen-WH/ga-ddp.git
 cd ga-ddp
 colcon build
 source install/setup.bash
