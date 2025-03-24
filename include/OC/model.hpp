@@ -132,7 +132,7 @@ public:
 
     Eigen::VectorXd q_new = q + dt*u;
     Eigen::VectorXd M_new = GA_rbt.fkine(q_new);
-    Eigen::VectorXd psi_new = ga_log(ga_prodM(ga_prodM(M_new, ga_rev(M)), ga_exp(psi)));
+    Eigen::VectorXd psi_new = GA::ga_log(GA::ga_prodM(GA::ga_prodM(M_new, GA::ga_rev(M)), GA::ga_exp(psi)));
     f << psi_new, q_new;
     return f;
   }
@@ -151,7 +151,7 @@ class Robot_dyn : public Model { // x = [psi, q, dq], u = tau
 public:
   GA::robot GA_rbt;
 
-  Robot(const std::string& robot_model) : GA_rbt(robot_model) {
+  Robot_dyn(const std::string& robot_model) : GA_rbt(robot_model) {
     x_dims = 6 + 2*GA_rbt.n;
     u_dims = GA_rbt.n;
     u_min = Eigen::VectorXd(u_dims); u_max = Eigen::VectorXd(u_dims);
@@ -172,9 +172,9 @@ public:
     Eigen::VectorXd ddq = GA_rbt.fdyn(q, dq, u, Eigen::VectorXd::Zero(u_dims));
 
     Eigen::VectorXd dq_new = dq + dt*ddq;
-    Eigen::VectorXd q_new = q + dt*dq_new;
+    Eigen::VectorXd q_new = q + dt*dq;
     Eigen::VectorXd M_new = GA_rbt.fkine(q_new);
-    Eigen::VectorXd psi_new = ga_log(ga_prodM(ga_prodM(M_new, ga_rev(M)), ga_exp(psi)));
+    Eigen::VectorXd psi_new = GA::ga_log(GA::ga_prodM(GA::ga_prodM(M_new, GA::ga_rev(M)), GA::ga_exp(psi)));
     f << psi_new, q_new, dq_new;
     return f;
   }
@@ -183,15 +183,14 @@ public:
     fx.resize(x_dims, x_dims);
     fu.resize(x_dims, u_dims);
     Eigen::VectorXd q = x.segment(6, u_dims), dq = x.tail(u_dims);
-    Eigen::MatrixXd J = GA_rbt.jacob_G(q);
     Eigen::MatrixXd pddq_pq, pddq_pdq, pddq_ptau;
     GA_rbt.fdyn_fo(q, dq, u, Eigen::VectorXd::Zero(u_dims), pddq_pq, pddq_pdq, pddq_ptau);
     fx.block(0, 0, 6 + u_dims, 6 + u_dims) = Eigen::MatrixXd::Identity(6 + u_dims, 6 + u_dims);
-    fx.block(0, 6 + u_dims, 6, u_dims) = -h * J;
-    fx.block(6, 6 + u_dims, u_dims, u_dims) = h * Eigen::MatrixXd::Identity(u_dims, u_dims);
+    fx.block(0, 6 + u_dims, 6, u_dims) = -dt * GA_rbt.jacob_G(q);
+    fx.block(6, 6 + u_dims, u_dims, u_dims) = dt * Eigen::MatrixXd::Identity(u_dims, u_dims);
     fx.block(6 + u_dims, 0, u_dims, 6) = Eigen::MatrixXd::Zero(u_dims, 6);
-    fx.block(6 + u_dims, 6, u_dims, u_dims) = h * pddq_pq;
-    fx.block(6 + u_dims, 6 + u_dims, u_dims, u_dims) = Eigen::MatrixXd::Identity(u_dims, u_dims) + h * pddq_pdq;
+    fx.block(6 + u_dims, 6, u_dims, u_dims) = dt * pddq_pq;
+    fx.block(6 + u_dims, 6 + u_dims, u_dims, u_dims) = Eigen::MatrixXd::Identity(u_dims, u_dims) + dt * pddq_pdq;
     fu << Eigen::MatrixXd::Zero(6 + u_dims, u_dims), dt*pddq_ptau;
     return;
   }
