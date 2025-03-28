@@ -3,9 +3,10 @@
 A differential dynamic programming algorithm based on geometric algebra, considering the complete dynamics of robots.
 
 <p align = "center">
-<img src="./images/simulation.gif" width = "240" height = "426" border="5" />
-<img src="./images/experiment.gif" width = "240" height = "426" border="5" />
+<img src="./images/simulation.gif" width = "320" height = "426" border="5" />
+<img src="./images/experiment.gif" width = "320" height = "426" border="5" />
 </p>
+
 
 ## 1. Introduction
 
@@ -37,7 +38,7 @@ ros2 run ga-ddp iLQR_robot_test
 
 ## 4. Highlights
 
-### A Novel Perspective
+### A Geometric Perspective
 
 | $SE(3)$ metric task: flying box capture | GA element task: dual robot calibration |
 | :---------: | :---------: |
