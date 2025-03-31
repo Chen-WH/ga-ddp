@@ -32,7 +32,8 @@ ros2 run ga-ddp iLQR_robot_test
 - benchmark: Benchmark testing code for the proposed method and other algorithms (Note: The SVA algorithm requires downloading [spatial_v2_extended](https://github.com/ROAM-Lab-ND/spatial_v2_extended)).
 - description: Robot description files.
 - images: Some saved results.
-- include: Header files for the ga-ddp library.
+- include: Header files for the ga-ddp library, with interfaces consistent with the MATLAB code.
+- matlab: MATLAB implementation of basic GA functions (Note: the DDP algorithm requires downloading [iLQG/DDP trajectory optimization](https://ww2.mathworks.cn/matlabcentral/fileexchange/52069-ilqg-ddp-trajectory-optimization)).
 - src: Source code files for the ga-ddp library.
 - tests: Test programs and some examples for the ga-ddp library.
 
