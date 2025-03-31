@@ -1,6 +1,6 @@
 # GA-DDP
 
-A differential dynamic programming algorithm based on geometric algebra, considering the complete dynamics of robots.
+A differential dynamic programming algorithm based on geometric algebra, considering the full dynamics of robots.
 
 <p align = "center">
 <img src="./images/simulation.gif" width = "320" height = "426" border="5" />
@@ -33,7 +33,7 @@ ros2 run ga-ddp iLQR_robot_test
 - description: Robot description files.
 - images: Some saved results.
 - include: Header files for the ga-ddp library, with interfaces consistent with the MATLAB code.
-- matlab: MATLAB implementation of basic GA functions (Note: the DDP algorithm requires downloading [iLQG/DDP trajectory optimization](https://ww2.mathworks.cn/matlabcentral/fileexchange/52069-ilqg-ddp-trajectory-optimization)).
+- matlab: MATLAB implementation of basic GA functions (Note: the MATLAB implementation of the DDP algorithm requires downloading [iLQG/DDP trajectory optimization](https://ww2.mathworks.cn/matlabcentral/fileexchange/52069-ilqg-ddp-trajectory-optimization)).
 - src: Source code files for the ga-ddp library.
 - tests: Test programs and some examples for the ga-ddp library.
 
