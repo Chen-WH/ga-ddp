@@ -8,10 +8,7 @@ int main() {
 
   // 初始化权重矩阵
   Eigen::MatrixXd Q_k = Eigen::MatrixXd::Zero(rbt->x_dims, rbt->x_dims);
-  Q_k.block(6, 6, 6, 6) = Eigen::MatrixXd::Identity(6, 6);
-  Q_k.block(6 + rbt->u_dims, 6 + rbt->u_dims, rbt->u_dims, rbt->u_dims) = 0.2*Eigen::MatrixXd::Identity(rbt->u_dims, rbt->u_dims);
-  Q_k(14, 14) = 0.3;
-  Q_k(17, 17) = 0.4;
+  Q_k.block(0, 0, 6, 6) = 10*Eigen::MatrixXd::Identity(6, 6);
   Eigen::MatrixXd R_k = Eigen::MatrixXd::Zero(rbt->u_dims, rbt->u_dims);
   Eigen::MatrixXd Q_T = Q_k;
   //Q_T.block(0, 0, 6, 6) = 100*Eigen::MatrixXd::Identity(6, 6);
